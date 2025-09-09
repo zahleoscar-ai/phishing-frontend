@@ -4,10 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phishing Checker Frontend</title>
-  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    #log { margin-top: 1rem; }
+    p { margin: 0.5rem 0; }
+    .error { color: red; }
+  </style>
 </head>
 <body>
-  <h1>Phishing Checker</h1>
+  <h1>Phishing Checker Frontends</h1>
   <div id="log"></div>
 
   <script type="module">
@@ -17,11 +22,11 @@
 
     // Supabase client
     const supabase = createClient(
-      "https://bbsekrlpwcwbdocbxiya.supabase.co",  // din Supabase URL
+      "https://bbsekrlpwcwbdocbxiya.supabase.co",  // SUPABASE_URL
       "a8f9c71593285b59548f1b786518e6b058142e10d9d806d453b6a2647a32a6fb"  // ANON KEY
     );
 
-    // Realtime listener
+    // Realtime listener på PhishingChecker
     supabase
       .from("PhishingChecker")
       .on("INSERT", async (payload) => {
@@ -39,10 +44,12 @@
           logEl.innerHTML += `<p>Edge function respons: ${text}</p>`;
         } catch (err) {
           console.error(err);
-          logEl.innerHTML += `<p style="color:red">Fejl: ${err}</p>`;
+          logEl.innerHTML += `<p class="error">Fejl: ${err}</p>`;
         }
       })
       .subscribe();
+
+    logEl.innerHTML += "<p>Realtime listener er aktiv...</p>";
   </script>
 </body>
 </html>
