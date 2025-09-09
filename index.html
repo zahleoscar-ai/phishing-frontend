@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phishing Checker Frontend</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Phishing Checker</h1>
+  <div id="log"></div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const logEl = document.getElementById("log");
+
+    // Supabase client
+    const supabase = createClient(
+      "https://bbsekrlpwcwbdocbxiya.supabase.co",  // din Supabase URL
+      "a8f9c71593285b59548f1b786518e6b058142e10d9d806d453b6a2647a32a6fb"  // ANON KEY
+    );
+
+    // Realtime listener
+    supabase
+      .from("PhishingChecker")
+      .on("INSERT", async (payload) => {
+        const newRow = payload.new;
+        logEl.innerHTML += `<p>Ny række tilføjet: ${JSON.stringify(newRow)}</p>`;
+
+        // Send til Edge Function
+        try {
+          const res = await fetch("https://bbsekrlpwcwbdocbxiya.functions.supabase.co/phishing-worker", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newRow),
+          });
+          const text = await res.text();
+          logEl.innerHTML += `<p>Edge function respons: ${text}</p>`;
+        } catch (err) {
+          console.error(err);
+          logEl.innerHTML += `<p style="color:red">Fejl: ${err}</p>`;
+        }
+      })
+      .subscribe();
+  </script>
+</body>
+</html>
